@@ -36,7 +36,17 @@ router.route('/pets')
 		});
 	})
 	.get((req, res) => {
-		Pet.find((err, pets) => {
+		const params = req.query;
+
+		const results = Pet.find();
+
+		if (params.order_by === 'score') {
+			results.sort({
+				score: -1
+			});
+		}
+
+		results.exec((err, pets) => {
 			if (err) {
 				res.send(err);
 			}
@@ -84,9 +94,12 @@ router.route('/pets/:pet_id')
 		});
 	});
 
+
+
 router.get('/', (req, res) => {
 	res.json({ message: `What's up, dog?`});
 });
+
 
 
 app.use('/api', router);

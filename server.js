@@ -25,11 +25,7 @@ router.route('/vote/:pet_id')
                 res.send(err);
             }
 
-            if (req.body.vote_type === 'UPVOTE') {
-                pet.score += 1;
-            } else if (req.body.vote_type === 'DOWNVOTE') {
-                pet.score -= 1;
-            }
+            pet.score += 1;  
 
             pet.save((err, doc) => {
                 if (err) {

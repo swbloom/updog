@@ -18,6 +18,28 @@ router.use((req, res, next) => {
     next();
 });
 
+router.route('/vote/:pet_id')
+    .put((req, res) => {
+        Pet.findById(req.params.pet_id, (err, pet) => {
+            if (err) {
+                res.send(err);
+            }
+
+            if (req.body.vote_type === 'UPVOTE') {
+                pet.score += 1;
+            } else if (req.body.vote_type === 'DOWNVOTE') {
+                pet.score -= 1;
+            }
+
+            pet.save((err, doc) => {
+                if (err) {
+                    res. send(err);
+                }
+                res.json(doc);
+            });
+        });
+    });
+
 router.route('/pets')
     .post((req, res) => {
         const pet = new Pet();

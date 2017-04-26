@@ -27,6 +27,9 @@
     "mongoose": "^4.9.5"
   },
   "devDependencies": {
-    "jest": "^19.0.2"
+    "eslint": "^4.0.0-alpha.1",
+    "eslint-plugin-import": "^2.2.0",
+    "jest": "^19.0.2",
+    "supertest": "^3.0.0"
   }
 }

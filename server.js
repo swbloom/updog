@@ -16,8 +16,8 @@ const router = express.Router();
 app.use(express.static('public'));
 
 router.use((req, res, next) => {
-	console.log('middleware ->');
-	next();
+    console.log('middleware ->');
+    next();
 });
 
 router.route('/pets')
@@ -93,13 +93,9 @@ router.route('/pets/:pet_id')
 		});
 	});
 
-
-
 router.route('/').get((req, res) => {
 	res.json({ message: `What's up, dog?`});
 });
-
-
 
 app.use('/api', router);
 

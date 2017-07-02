@@ -4,7 +4,10 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Pet = require('./models/pet.js');
 
-mongoose.connect('mongodb://localhost/updog');
+mongoose.connect(
+	process.env.MONGOLAB_URI ||
+	process.env.MONGOHQ_URL ||
+	'mongodb://localhost/updog');
 
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());

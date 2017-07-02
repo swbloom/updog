@@ -1,10 +1,10 @@
-const express			= require('express');
-const app				= express();
-const bodyParser		= require('body-parser');
-const mongoose			= require('mongoose');
-const Pet 				= require('./models/pet.js');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const Pet = require('./models/pet.js');
 
-mongoose.connect('mongodb://localhost:27017/updog');
+mongoose.connect('mongodb://localhost/updog');
 
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
@@ -12,6 +12,8 @@ app.use(bodyParser.json());
 const port = process.env.PORT || 8080;
 
 const router = express.Router();
+
+app.use(express.static('public'));
 
 router.use((req, res, next) => {
 	console.log('middleware ->');
@@ -21,7 +23,7 @@ router.use((req, res, next) => {
 router.route('/pets')
 	.post((req, res) => {
 		const pet = new Pet();
-
+		console.log(req.body);
 		pet.name = req.body.name; 
 		pet.score = 0 // all pets start with a base score of 0
 		pet.description = req.body.description;
@@ -68,11 +70,8 @@ router.route('/pets/:pet_id')
 			if (err) {
 				res.send(err);
 			}
-
-			pet.name = req.body.name;
-			pet.score = req.body.score;
-			pet.description = req.body.description;
-			pet.photo = req.body.photo;
+			
+			Object.assign(pet, req.body, {score: pet.score += 1});
 			
 			pet.save((err, doc) => {
 				if (err) {
@@ -96,7 +95,7 @@ router.route('/pets/:pet_id')
 
 
 
-router.get('/', (req, res) => {
+router.route('/').get((req, res) => {
 	res.json({ message: `What's up, dog?`});
 });
 

@@ -1,118 +1,101 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Pet = require('./models/pet.js');
+const bodyParser = require('body-parser');
 
-mongoose.connect('mongodb://localhost:27017/updog');
+const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/updog'
 
-app.use(bodyParser.urlencoded({ extended: true}));
+mongoose.connect(dbURL);
+
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 8080;
 
 const router = express.Router();
 
+app.use(express.static('public'));
+
 router.use((req, res, next) => {
-    console.log('middleware ->');
-    next();
+	console.log('middleware ->');
+	next();
 });
 
-router.route('/vote/:pet_id')
-    .put((req, res) => {
-        Pet.findById(req.params.pet_id, (err, pet) => {
-            if (err) {
-                res.send(err);
-            }
-
-            pet.score += 1;  
-
-            pet.save((err, doc) => {
-                if (err) {
-                    res. send(err);
-                }
-                res.json(doc);
-            });
-        });
-    });
-
 router.route('/pets')
-    .post((req, res) => {
-        const pet = new Pet();
-        pet.name = req.body.name; 
-        pet.score = 0; // all pets start with a base score of 0
-        pet.description = req.body.description;
-        pet.photo = req.body.photo;
-    
-        pet.save((err, doc) => {
-            if (err) {
-                res.send(err); 
-            }
+	.post((req, res) => {
+		const pet = new Pet();
+		console.log(req.body);
+		pet.name = req.body.name; 
+		pet.score = 0 // all pets start with a base score of 0
+		pet.description = req.body.description;
+		pet.photo = req.body.photo;
 
-            res.json(doc);
-        });
-    })
-    .get((req, res) => {
-        const params = req.query;
-        const results = Pet.find();
+		pet.save((err, doc) => {
+			if (err) {
+				res.send(err);
+			}
 
-        if (params.order_by === 'score') {
-            results.sort({
-                score: -1
-            });
-        }
+			res.json(doc);
+		});
+	})
+	.get((req, res) => {
+		const params = req.query;
 
-        results.exec((err, pets) => {
-            if (err) {
-                res.send(err);
-            }
+		const results = Pet.find();
 
-            res.json(pets);
-        });
-    });
+		if (params.order_by === 'score') {
+			results.sort({
+				score: -1
+			});
+		}
+
+		results.exec((err, pets) => {
+			if (err) {
+				res.send(err);
+			}
+			res.json(pets);
+		});
+});
 
 router.route('/pets/:pet_id')
-    .get((req, res) => {
-        Pet.findById(req.params.pet_id, (err, pet) => {
-            if (err) {
-                res.send(err);
-            } 
+	.get((req, res) => {
+		Pet.findById(req.params.pet_id, (err, pet) => {
+			if (err) {
+				res.send(err);
+			}
+			res.json(pet);
+		});
+	})
+	.put((req, res) => {
+		Pet.findById(req.params.pet_id, (err, pet) => {
+			if (err) {
+				res.send(err);
+			}
+			
+			Object.assign(pet, req.body, {score: pet.score += 1});
+			
+			pet.save((err, doc) => {
+				if (err) {
+					res.send(err);
+				}
+				res.json(doc);
+			});
+		});
+	})
+	.delete((req, res) => {
+		Pet.remove({
+			_id: req.params.pet_id
+		}, (err, pet) => {
+			if (err) {
+				res.send(err);
+			}
 
-            res.json(pet);
-        });
-    })
-    .put((req, res) => {
-        Pet.findById(req.params.pet_id, (err, pet) => {
-            if (err) {
-                res.send(err);
-            }
-            
-            pet.name = req.body.name;
-            pet.score = req.body.score;
-            pet.description = req.body.description;
-            pet.photo = req.body.photo;
+			res.json({ message: 'Successfully deleted'});
+		});
+	});
 
-            pet.save((err, doc) => {
-                if (err) {
-                    res.send(err);
-                }
-                res.json(doc);
-            });
-        });
-    })
-    .delete((req, res) => {
-        Pet.remove({
-            _id: req.params.pet_id
-        },  (err) => {
-            if (err) {
-                res.send(err);
-            }
-        });
-        res.json({ message: 'Successfully deleted'});
-    });
-
-router.get('/', (req, res) => {
-    res.json({ message: 'What\'s up, dog?'});
+router.route('/').get((req, res) => {
+	res.json({ message: `What's up, dog?`});
 });
 
 app.use('/api', router);

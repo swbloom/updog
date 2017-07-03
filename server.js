@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Pet = require('./models/pet.js');
+const bodyParser = require('body-parser');
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/updog'
 
@@ -17,8 +17,8 @@ const router = express.Router();
 app.use(express.static('public'));
 
 router.use((req, res, next) => {
-    console.log('middleware ->');
-    next();
+	console.log('middleware ->');
+	next();
 });
 
 router.route('/pets')

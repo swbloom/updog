@@ -8,7 +8,6 @@ const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/updog'
 
 mongoose.connect(dbURL);
 
-app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 8080;

@@ -11,8 +11,11 @@ updog.createDog = (data) => {
 	return $.ajax({
 		url: '/api/pets',
 		method: 'POST',
-		data,
-		dataType: 'json'
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json'
+		},
+		data: JSON.stringify(data),
 	});
 };
 

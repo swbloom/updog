@@ -4,22 +4,17 @@ const mongoose = require('mongoose');
 const Pet = require('./models/pet.js');
 const bodyParser = require('body-parser');
 
+const port = process.env.PORT || 8080;
+
+const router = express.Router();
+
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/updog'
 
 mongoose.connect(dbURL);
 
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 8080;
-
-const router = express.Router();
-
 app.use(express.static('public'));
-
-router.use((req, res, next) => {
-	console.log('middleware ->');
-	next();
-});
 
 router.route('/pets')
 	.post((req, res) => {
@@ -32,10 +27,12 @@ router.route('/pets')
 
 		pet.save((err, doc) => {
 			if (err) {
-				res.send(err);
+				res
+					.status(400)
+					.send(err);
+				return;
 			}
-
-			res.json(doc);
+			res.send(doc);
 		});
 	})
 	.get((req, res) => {
@@ -51,9 +48,14 @@ router.route('/pets')
 
 		results.exec((err, pets) => {
 			if (err) {
-				res.send(err);
+				res
+					.status(400)
+					.send(err);
+				return;
 			}
-			res.json(pets);
+			res
+				.status(200)
+				.send(pets);
 		});
 });
 
@@ -61,41 +63,59 @@ router.route('/pets/:pet_id')
 	.get((req, res) => {
 		Pet.findById(req.params.pet_id, (err, pet) => {
 			if (err) {
-				res.send(err);
+				res
+					.status(400)
+					.send(err);
+				return;
 			}
-			res.json(pet);
+			res
+				.status(200)
+				.send(pet);
 		});
 	})
 	.put((req, res) => {
 		Pet.findById(req.params.pet_id, (err, pet) => {
 			if (err) {
-				res.send(err);
+				res
+					.status(400)
+					.send(err);
+				return;
 			}
 			
 			Object.assign(pet, req.body, {score: pet.score += 1});
 			
 			pet.save((err, doc) => {
 				if (err) {
-					res.send(err);
+					res
+						.status(400)
+						.send(err);
+					return
 				}
-				res.json(doc);
+				res
+					.status(200)
+					.send(doc);
 			});
 		});
 	})
 	.delete((req, res) => {
-		Pet.remove({
-			_id: req.params.pet_id
-		}, (err, pet) => {
+		Pet.findByIdAndRemove(req.params.pet_id, (err, pet) => {
 			if (err) {
-				res.send(err);
+				res
+					.status(400)
+					.send(err);
+				return;
 			}
 
-			res.json({ message: 'Successfully deleted'});
+			res
+				.status(200)
+				.send({ 
+					message: 'Successfully deleted'
+				});
 		});
 	});
 
 router.route('/').get((req, res) => {
-	res.json({ message: `What's up, dog?`});
+	res.send({ message: `What's up, dog?`});
 });
 
 app.use('/api', router);
